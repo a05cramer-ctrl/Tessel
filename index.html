@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Tessel</title>
+<link rel="icon" href="pfp.jpg">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta property="og:title" content="Tessel"><meta property="og:description" content="Invest in a whole theme. Baskets of pump.fun coins on Solana."><meta property="og:image" content="og.jpg"><meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: warm cream app shell. Thin left icon rail, top ticker bar, big serif headline over a row of flat colour basket cards, then a treemap heatmap beside a market panel. */
+:root{--bg:#f1efe8;--card:#fbfaf6;--ink:#101a14;--mut:#6d726c;--line:#ddd9ce;--g:#1b3a26;--g2:#2d6a43;--up:#1f7a47;--dn:#c0463f;--pink:#f1a3cb;--blue:#3d4fe0;--sans:"Figtree",system-ui,sans-serif;--serif:"Newsreader",Georgia,serif;--mono:"DM Mono",ui-monospace,monospace}
+:root[data-t="dark"]{--bg:#0c0f0d;--card:#141a16;--ink:#ecefe9;--mut:#8a928b;--line:#242c26;--up:#59c486;--dn:#ef7a73}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--sans);overflow-x:clip;-webkit-font-smoothing:antialiased}
+a{color:inherit}button{font:inherit;color:inherit}
+.demo{margin-left:76px;background:#e7e0b8;color:#4b4310;text-align:center;font:500 11px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:8px 12px}
+:root[data-t="dark"] .demo{background:#2a2710;color:#d9cf9a}
+.rail{position:fixed;left:0;top:0;bottom:0;width:76px;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px;z-index:30}
+.rail .lg{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;font:600 11px var(--sans);margin-bottom:14px}
+.rail .lg svg{width:34px;height:34px}
+.rail a.n{width:60px;padding:10px 0 8px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:5px;font:500 11px var(--sans);color:var(--mut);text-decoration:none}
+.rail a.n svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7}
+.rail a.n:hover,.rail a.n.on{background:rgba(27,58,38,.1);color:var(--ink)}
+.rail .bt{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:10px;font:500 10px var(--sans);color:var(--mut)}
+.rail .bt i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#32c36c;margin-right:5px}
+main{margin-left:76px}
+.tick{height:46px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding-right:20px;position:sticky;top:0;background:var(--bg);z-index:20}
+.tick .mq{flex:1;overflow:hidden;white-space:nowrap;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
+.tick .mq div{display:inline-flex;gap:30px;animation:mq 60s linear infinite;padding-left:20px}
+@keyframes mq{to{transform:translateX(-50%)}}
+.tick .mq span{font:500 12px var(--mono);display:inline-flex;gap:8px;align-items:center}
+.tick .mq em{font-style:normal}
+.tb{display:flex;align-items:center;gap:8px}
+.ic{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:grid;place-items:center;font-size:15px}
+.cw{background:var(--g);color:#fff;border:0;border-radius:10px;font:600 13px var(--sans);padding:10px 16px;cursor:not-allowed;opacity:.9}
+.ca{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 10px;font:500 12px var(--mono);max-width:240px}
+.ca code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ca button{border:0;background:transparent;cursor:pointer;font:600 11px var(--sans);color:var(--g2)}
+.pad{padding:26px 26px 0;max-width:1480px}
+.eb{font:500 11px var(--sans);letter-spacing:.02em;color:var(--g2)}
+h1,h2{font:400 clamp(38px,5vw,58px)/1.04 var(--serif);letter-spacing:-.015em;margin:8px 0 0}
+h2{font-size:clamp(30px,4vw,42px)}
+.lead{color:var(--mut);max-width:520px;margin:10px 0 0}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.seg{display:flex;gap:6px;align-items:center}
+.seg button{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 11px;font:500 12px var(--mono);cursor:pointer}
+.seg button.on{background:var(--g);color:#fff;border-color:var(--g)}
+/* baskets */
+.row{display:flex;gap:16px;overflow-x:auto;padding:22px 0 8px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+.bk{flex:0 0 clamp(240px,23%,320px);scroll-snap-align:start;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:12px}
+.bk .sq{aspect-ratio:1.28;border-radius:12px;position:relative;overflow:hidden}
+.bk .chip{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between}
+.bk .chip span{background:rgba(0,0,0,.55);color:#fff;font:500 11px var(--mono);padding:4px 8px;border-radius:7px}
+.bk .chip span+span{background:rgba(255,255,255,.55);color:#111}
+.bk .sq svg{position:absolute;inset:0;width:100%;height:100%}
+.bk h3{margin:0;font:600 19px var(--sans)}
+.bk p{margin:0;color:var(--mut);font-size:13px;min-height:58px}
+.bk .ft{display:flex;justify-content:space-between;align-items:center}
+.bk .ft small{display:block;color:var(--mut);font:500 10px var(--mono);letter-spacing:.06em}
+.bk .ft b{font:500 20px var(--mono)}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.inv{background:var(--g);color:#fff;border:0;border-radius:999px;padding:11px 20px;font:600 13px var(--sans);cursor:pointer}
+.inv:hover{background:var(--g2)}
+/* heatmap */
+.hm{display:grid;grid-template-columns:1fr 290px;gap:16px;margin-top:20px}
+.pn{background:var(--card);border:1px solid var(--line);border-radius:18px}
+.hmh{display:flex;gap:10px;align-items:center;padding:14px 16px;flex-wrap:wrap}
+.hmh h3{margin:0;font:600 20px var(--sans)}
+.live{font:500 11px var(--mono);color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+.hmh .sp{flex:1}
+.hmh select,.hmh input{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font:500 12.5px var(--sans);color:var(--ink)}
+.map{position:relative;margin:0 14px 12px;height:780px}
+.map .g{position:absolute;border-radius:6px;overflow:hidden}
+.map .gl{position:absolute;left:0;top:0;font:500 11px var(--sans);color:var(--mut);padding:0 2px}
+.map .t{position:absolute;border-radius:5px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;cursor:pointer;border:1px solid var(--bg);transition:filter .12s}
+.map .t:hover{filter:brightness(1.12);outline:2px solid var(--ink);z-index:2}
+.map .t i{font-style:normal;display:grid;place-items:center;border-radius:50%;background:#fff;color:#111;font:700 11px var(--sans)}
+.map .t b{font:700 12px var(--sans);letter-spacing:.01em}
+.map .t s{text-decoration:none;font:600 11px var(--sans)}
+.legend{display:flex;align-items:center;gap:12px;padding:0 16px 14px;font:500 10.5px var(--mono);color:var(--mut);flex-wrap:wrap}
+.legend .bar{display:flex}.legend .bar i{width:34px;height:7px}
+.side{display:flex;flex-direction:column;gap:16px}
+.side .pn{padding:16px}
+.side .big{font:500 30px var(--serif);margin:6px 0 12px}
+.kv{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:var(--mut)}.kv b{color:var(--ink);font:500 13px var(--mono)}
+.ud{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:10px;gap:3px}.ud i{display:block;height:100%}
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+.tabs button{border:0;background:transparent;font:600 13px var(--sans);color:var(--mut);padding:5px 9px;border-radius:7px;cursor:pointer}
+.tabs button.on{background:var(--bg);color:var(--ink)}
+.li{display:flex;align-items:center;gap:10px;padding:7px 0}
+.li .av{width:26px;height:26px;border-radius:50%;background:var(--g);color:#fff;display:grid;place-items:center;font:700 10px var(--sans);flex:none}
+.li div{flex:1;min-width:0}.li b{display:block;font:600 13px var(--sans)}.li small{display:block;color:var(--mut);font:400 11px var(--mono)}
+.li .r{font:500 12.5px var(--mono);text-align:right;flex:none}
+/* sections */
+.sec{margin-top:70px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.three .pn{padding:22px}.three h3{font:400 24px var(--serif);margin:10px 0 8px}.three p{color:var(--mut);margin:0;font-size:14.5px}
+.num{font:500 11px var(--mono);color:var(--g2)}
+.bags{margin-top:22px;padding:34px;text-align:center}.bags p{color:var(--mut);margin:8px auto 18px;max-width:380px}
+.tok{margin-top:22px;padding:22px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.tok code{font:500 13px var(--mono);word-break:break-all}
+.btn{display:inline-block;background:var(--g);color:#fff;border-radius:10px;padding:11px 16px;font:600 13px var(--sans);text-decoration:none}
+.btn.o{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
+footer{margin:80px 0 0;border-top:1px solid var(--line);padding:24px 26px 60px;color:var(--mut);font-size:12.5px}
+/* modal */
+.md{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:grid;place-items:center;padding:16px}
+.md .bx{background:var(--card);border-radius:20px;border:1px solid var(--line);width:min(520px,100%);max-height:90vh;overflow:auto;padding:22px}
+.md h3{font:400 28px var(--serif);margin:6px 0 4px}
+.md .am{display:flex;gap:8px;margin:16px 0}.md .am input{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;font:500 16px var(--mono);color:var(--ink)}
+.md .rc{border:1px solid var(--line);border-radius:12px;padding:6px 12px;max-height:240px;overflow:auto}
+.md .rc div{display:flex;justify-content:space-between;padding:6px 0;font:500 12.5px var(--mono);border-bottom:1px solid var(--line)}.md .rc div:last-child{border:0}
+.md .x{float:right;border:0;background:transparent;font-size:22px;cursor:pointer}
+@media (max-width:980px){
+ .hm{grid-template-columns:1fr}.three{grid-template-columns:1fr}
+ .rail{top:auto;right:0;width:auto;height:62px;flex-direction:row;justify-content:space-around;padding:6px;border-right:0;border-top:1px solid var(--line)}
+ .rail .lg,.rail .bt{display:none}.rail a.n{width:auto;flex:1;padding:6px 0}
+ main,.demo{margin-left:0}main{padding-bottom:70px}
+ .pad{padding:20px 16px 0}.tick .ca{display:none}
+ .map{height:560px;margin-inline:8px}
+}
+@media (max-width:520px){.bk{flex-basis:80%}.tick .mq{display:none}.tick{justify-content:space-between;padding-left:16px}.tick .tb{margin-left:auto}}
+@media (prefers-reduced-motion:reduce){.tick .mq div{animation:none}}
+</style>
+
+<div class="demo">Demonstration · sample coins, returns and baskets · nothing here is live yet</div>
+<nav class="rail" aria-label="Main">
+  <a class="lg" href="#top"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#1b3a26"/><g fill="#fff"><rect x="8" y="9" width="7" height="7" rx="1.5"/><rect x="16.5" y="9" width="7" height="7" rx="1.5"/><rect x="25" y="9" width="7" height="7" rx="1.5"/><rect x="16.5" y="17.5" width="7" height="7" rx="1.5"/><rect x="16.5" y="26" width="7" height="7" rx="1.5"/></g></svg>tessel</a>
+  <a class="n on" href="#top"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="8" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="11" width="7" height="10" rx="1.5"/></svg>Home</a>
+  <a class="n" href="#baskets"><svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5-9 5zM3 14l9 5 9-5"/></svg>Baskets</a>
+  <a class="n" href="#bags"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2"/></svg>Bags</a>
+  <a class="n" href="#how"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>How</a>
+  <div class="bt"><a id="rx" href="#token" style="text-decoration:none">X</a><span><i></i>Demo</span></div>
+</nav>
+<main id="top">
+  <div class="tick"><div class="mq"><div id="mq"></div></div><div class="tb"><div class="ca" id="cab"><span style="color:var(--mut)">CA</span><code id="ca">Posts at launch</code><button type="button" id="cp" hidden>Copy</button></div><button class="ic" id="th" type="button" aria-label="Toggle theme">◐</button><button class="cw" type="button" disabled>Connect wallet</button></div></div>
+  <div class="pad">
+    <div class="hd"><div><div class="eb">Baskets on Solana</div><h1>Invest in a whole theme.</h1><p class="lead">One basket, every pump.fun coin that passes the rules, one transaction. The coins land in your own wallet.</p></div>
+      <div class="seg" id="win"><button data-w="24H">24H</button><button data-w="7D" class="on">7D</button><button data-w="30D">30D</button><button data-w="ALL">ALL</button></div></div>
+    <div class="row" id="baskets"></div>
+
+    <div class="hm" id="heat">
+      <div class="pn">
+        <div class="hmh"><h3>Pump Heatmap</h3><span class="live">Sample · demo</span><span class="sp"></span><input id="fq" placeholder="Find a coin" aria-label="Find a coin"><select id="fc" aria-label="Category"><option value="">All categories</option></select><select id="fm" aria-label="Colour by"><option value="p">Performance since listing %</option><option value="d">Performance 24h %</option></select></div>
+        <div class="map" id="map"></div>
+        <div class="legend"><span>−250%</span><span class="bar" id="lg"></span><span>+250%</span><span style="margin-left:auto">Every sample coin · tile size is volume 24h · not affiliated with pump.fun</span></div>
+      </div>
+      <div class="side">
+        <div class="pn"><div class="lab" style="font:500 12px var(--mono);color:var(--mut)">MARKET · SAMPLE</div><div class="big" id="mc">—</div><div class="kv">Coins on the map<b id="mn">—</b></div><div class="kv">Volume 24h<b id="mv">—</b></div><div class="kv">Baskets<b>6</b></div><div class="ud"><i id="ub" style="background:var(--up)"></i><i id="ud" style="background:var(--dn)"></i></div></div>
+        <div class="pn"><div class="tabs"><button class="on" data-g="g">Top gainers</button><button data-g="l">Top losers</button><span style="margin-left:auto;font:500 11px var(--mono);color:var(--mut);align-self:center">24H</span></div><div id="gl"></div></div>
+        <div class="pn"><div style="display:flex;justify-content:space-between"><b>Baskets</b><a href="#baskets" style="font-size:12px;color:var(--g2)">View all ›</a></div><div id="ix"></div></div>
+      </div>
+    </div>
+
+    <section class="sec" id="bags"><div class="eb">Bags</div><h2>Your bags.</h2><div class="pn bags"><b style="font:400 24px var(--serif)">Nothing here yet.</b><p>Connect a wallet to see the baskets and coins you hold. Wallets are not connected in this demo.</p><button class="cw" type="button" disabled>Connect wallet</button></div></section>
+
+    <section class="sec" id="how"><div class="eb">How it works</div><h2>One flow. Every coin.</h2>
+      <div class="three"><div class="pn"><div class="num">01</div><h3>Choose the basket</h3><p>Pick a theme: AI &amp; agents, dogs, cats, frogs, the ten biggest coins. Each lists every coin it holds and why it is in.</p></div><div class="pn"><div class="num">02</div><h3>Enter your SOL amount</h3><p>One number. Tessel splits it by the basket's weights, capped at 20% per coin, and shows you the exact coins you will receive.</p></div><div class="pn"><div class="num">03</div><h3>One transaction</h3><p>The coins land in your own wallet, not in a pooled token. Sell any of them whenever you like.</p></div></div></section>
+
+    <section class="sec" id="token"><div class="eb">$TESSEL</div><h2>The token is $TESSEL.</h2>
+      <div class="pn tok"><div><div class="eb" style="color:var(--mut)">CA</div><code id="ca2">Posts at launch</code></div><div style="display:flex;gap:10px"><a class="btn" id="tb2" href="#token" aria-disabled="true">Buy $TESSEL</a><a class="btn o" id="tx" href="#token" aria-disabled="true">X</a></div></div></section>
+  </div>
+  <footer><p>Tessel is a demonstration. Coins, returns, volumes and baskets shown are samples and nothing here is live. Baskets are not available yet. $TESSEL is a memecoin with no promise of value. Not financial advice. Not affiliated with pump.fun.</p></footer>
+</main>
+
+<div class="md" id="md" hidden><div class="bx"><button class="x" id="mx" type="button" aria-label="Close">×</button><div class="eb" id="mt1"></div><h3 id="mt2"></h3><p class="lead" id="mt3" style="margin:0"></p>
+  <div class="am"><input id="amt" type="number" min="0" step="0.1" value="1" aria-label="SOL amount"><span style="align-self:center;font:600 14px var(--sans)">SOL</span></div>
+  <div class="lab" style="font:500 11px var(--mono);color:var(--mut);margin-bottom:6px">YOU WOULD RECEIVE · SAMPLE</div><div class="rc" id="rc"></div>
+  <button class="cw" style="width:100%;margin-top:14px;padding:13px" type="button" disabled>Demo · baskets are not live yet</button></div></div>
+
+<script src="config.js"></script>
+<script>
+var C=window.TESSEL_CFG,$=function(s){return document.querySelector(s)},reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+(function(){var ca=C.CA,buy=C.BUY||(ca?"https://pump.fun/coin/"+ca:"");function set(i,h){var e=$(i);if(e&&h){e.href=h;e.target="_blank";e.rel="noopener";e.removeAttribute("aria-disabled")}}
+ if(ca){$("#ca").textContent=ca;$("#ca2").textContent=ca;$("#cp").hidden=false;$("#cp").onclick=function(){try{navigator.clipboard.writeText(ca)}catch(e){}var b=this;b.textContent="Copied";setTimeout(function(){b.textContent="Copy"},1400)}}
+ set("#tb2",buy);set("#tx",C.X);set("#rx",C.X)})();
+$("#th").onclick=function(){var r=document.documentElement;r.dataset.t=r.dataset.t==="dark"?"":"dark";draw()};
+/* seeded sample data */
+var sd=11,R=function(){sd=(sd*9301+49297)%233280;return sd/233280};
+var CATS={"AI & Agents":["ORBIO","CRADLE","ANYR","LIEGE","PRIORS","HARMONIC","AIGYR","CRED","ERRAND","QUOTUM","TALON","AGENT","LAIN","WORM","ORBZ","NFX"],"Memes":["ZERO","CONV","SHOOKS","FABLE","TENDIES","SPARE","SGT","UPAY","HYDX","VERDEX","MVA","LM"],"Dogs":["WOOFER","BARKLY","SNIFF","PUPPO","KIBBLE","FETCH","DOGGO","BONZ","TAILS"],"Cats":["CASHCAT","MEOWL","WHISK","PAWS","MITTENS","TOMCAT","PURR"],"Frogs":["RIBBIT","LILY","TOADY","HOPPY","PONDO","CROAK","BOGGY"],"Tools":["PADLY","SWAPR","SNIPE","TRACKR","LAUNCHR","BAGZ"]};
+var COINS=[];Object.keys(CATS).forEach(function(k){CATS[k].forEach(function(n,i){var v=Math.exp(9+R()*5.2)*(i<3?3:1);var p=(R()<.45?-(6+R()*R()*85):(5+R()*R()*340));COINS.push({n:n,c:k,v:v,p:p,d:(R()-.4)*60+(i<2?20:0),px:(R()*0.02).toFixed(5)})})});
+var PAL=["#f1a3cb","#1b3a26","#f1a3cb","#3d4fe0","#1b3a26","#e9b44c"];
+var BK=[["$tAI","AI & Agents","Every pump.fun coin whose product is AI: agents, inference and AI apps. Back the machines without picking one.","AI & Agents"],["$tP10","Pump 10","The ten biggest coins launched on pump.fun, capped at 20% each. The first bridge for new money.","TOP"],["$tCAT","Cats","Every cat that made it on pump.fun. History says never bet against the cats.","Cats"],["$tDOG","Dogs","The loyal ones. Every dog coin that kept its pool deep.","Dogs"],["$tFROG","Frogs","Ribbit. Frogs that survived more than one cycle.","Frogs"],["$tTOOL","Tools","The picks and shovels: swappers, snipers, trackers and launchers.","Tools"]];
+function members(b){var l=b[3]==="TOP"?COINS.slice().sort(function(a,c){return c.v-a.v}).slice(0,10):COINS.filter(function(c){return c.c===b[3]});return l}
+function ret(b,w){var m=members(b),a=m.reduce(function(s,c){return s+c.p},0)/m.length,f={"24H":.06,"7D":.35,"30D":.8,"ALL":1}[w];return a*f}
+var W="7D";
+function art(i,m){var c=PAL[i%6],dk=i%2?"255,255,255":"0,0,0",s="",n=0;for(var j=0;j<3;j++)for(var k=0;k<5;k++){var x=k*22+6,y=j*26+10,cn=m&&m[n++];s+='<rect x="'+x+'" y="'+y+'" width="19" height="23" rx="4" fill="rgba('+dk+','+(cn?.2:.08)+')"/>';if(cn)s+='<text x="'+(x+9.5)+'" y="'+(y+15)+'" text-anchor="middle" font-size="9" font-weight="700" font-family="Figtree,sans-serif" fill="rgba('+dk+',.75)">'+cn.n[0]+'</text>'}return'<svg viewBox="0 0 120 94" preserveAspectRatio="xMidYMid slice"><rect width="120" height="94" fill="'+c+'"/>'+s+'</svg>'}
+function fm(n,d){var a=Math.abs(n);return(n>=0?"+":"−")+a.toLocaleString("en-US",{maximumFractionDigits:d==null?2:d})+"%"}
+function baskets(){$("#baskets").innerHTML=BK.map(function(b,i){var r=ret(b,W),m=members(b);return'<div class="bk"><div class="sq">'+art(i,m)+'<div class="chip"><span>'+b[0]+'</span><span>'+m.length+' coins</span></div></div><h3>'+b[1]+'</h3><p>'+b[2]+'</p><div class="ft"><div><small>'+W+' RETURN</small><b class="'+(r>=0?"up":"dn")+'">'+fm(r)+'</b></div><button class="inv" data-i="'+i+'" type="button">Invest</button></div></div>'}).join("");
+ $("#ix").innerHTML=BK.map(function(b){var r=ret(b,"24H");return'<div class="li"><div class="av">'+b[0].slice(2,4)+'</div><div><b>'+b[1]+'</b><small>'+b[0]+' · '+members(b).length+' coins</small></div><div class="r '+(r>=0?"up":"dn")+'">'+fm(r)+'</div></div>'}).join("")}
+$("#win").onclick=function(e){var b=e.target.closest("button");if(!b)return;W=b.dataset.w;[].forEach.call(this.children,function(x){x.classList.toggle("on",x===b)});baskets()};
+var cur=null;
+function upd(){var m=members(cur),a=+$("#amt").value||0,t=m.reduce(function(s,c){return s+c.v},0),w=m.map(function(c){return Math.min(.2,c.v/t)}),ws=w.reduce(function(s,x){return s+x},0);$("#rc").innerHTML=m.map(function(c,i){var p=w[i]/ws;return'<div><span>'+c.n+' · '+(p*100).toFixed(1)+'%</span><span>'+(a*p).toFixed(3)+' SOL</span></div>'}).join("")}
+$("#baskets").onclick=function(e){var b=e.target.closest(".inv");if(!b)return;cur=BK[+b.dataset.i];var m=members(cur);$("#mt1").textContent=cur[0]+" · "+m.length+" coins";$("#mt2").textContent=cur[1];$("#mt3").textContent=cur[2];$("#md").hidden=false;upd()};
+$("#amt").oninput=function(){if(cur)upd()};
+$("#md").onclick=function(e){if(e.target===this||e.target.id==="mx")this.hidden=true};
+/* ticker */
+(function(){var t=COINS.slice(0,18).map(function(c){return'<span><b>'+c.n+'</b> $'+c.px+' <em class="'+(c.d>=0?"up":"dn")+'">'+fm(c.d,1)+'</em></span>'}).join("");$("#mq").innerHTML=t+t})();
+/* side panel */
+var tot=COINS.reduce(function(s,c){return s+c.v},0);function B(x){return x>=1e9?"$"+(x/1e9).toFixed(2)+"B":"$"+(x/1e6).toFixed(2)+"M"}$("#mc").textContent=B(tot*38);$("#mn").textContent=COINS.length;$("#mv").textContent=B(tot);
+var up=COINS.filter(function(c){return c.d>=0}).length;$("#ub").style.width=(up/COINS.length*100)+"%";$("#ud").style.width=((COINS.length-up)/COINS.length*100)+"%";
+function gl(k){var l=COINS.slice().sort(function(a,b){return k==="g"?b.d-a.d:a.d-b.d}).slice(0,7);$("#gl").innerHTML=l.map(function(c){return'<div class="li"><div class="av">'+c.n[0]+'</div><div><b>'+c.n+'</b><small>$'+c.px+'</small></div><div class="r '+(c.d>=0?"up":"dn")+'">'+fm(c.d,1)+'</div></div>'}).join("")}
+gl("g");document.querySelector(".tabs").onclick=function(e){var b=e.target.closest("button");if(!b)return;[].forEach.call(this.children,function(x){x.classList&&x.classList.toggle("on",x===b)});gl(b.dataset.g)};
+/* treemap */
+function sq(items,x,y,w,h,out){if(!items.length)return;var tot=items.reduce(function(s,i){return s+i.val},0),sc=w*h/tot,a=items.map(function(i){return{i:i,a:i.val*sc}}),row=[],rest=a.slice();
+ function worst(r,s){var sm=r.reduce(function(t,q){return t+q.a},0),mx=Math.max.apply(0,r.map(function(q){return q.a})),mn=Math.min.apply(0,r.map(function(q){return q.a}));return Math.max(s*s*mx/(sm*sm),sm*sm/(s*s*mn))}
+ while(rest.length){var s=Math.min(w,h);row=[rest.shift()];while(rest.length&&worst(row.concat([rest[0]]),s)<=worst(row,s))row.push(rest.shift());
+  var sm=row.reduce(function(t,q){return t+q.a},0);if(w>=h){var cw=sm/h,cy=y;row.forEach(function(q){var ch=q.a/cw;out.push({i:q.i,x:x,y:cy,w:cw,h:ch});cy+=ch});x+=cw;w-=cw}else{var rh=sm/w,cx=x;row.forEach(function(q){var cw=q.a/rh;out.push({i:q.i,x:cx,y:y,w:cw,h:rh});cx+=cw});y+=rh;h-=rh}}}
+function col(p){var t=Math.max(-250,Math.min(250,p))/250,dk=document.documentElement.dataset.t==="dark";if(t>=0){var a=.28+.72*Math.sqrt(t);return"rgb("+Math.round(228-(228-27)*a)+","+Math.round(240-(240-86)*a)+","+Math.round(232-(232-52)*a)+")"}var a2=.3+.7*Math.sqrt(-t);return"rgb("+Math.round(240-(240-176)*a2)+","+Math.round(210-(210-60)*a2)+","+Math.round(206-(206-56)*a2)+")"}
+function draw(){var el=$("#map");if(!el)return;var W2=el.clientWidth,H=el.clientHeight,q=$("#fq").value.toLowerCase(),cf=$("#fc").value,mode=$("#fm").value;el.innerHTML="";
+ var groups=Object.keys(CATS).filter(function(k){return!cf||k===cf}).map(function(k){var l=COINS.filter(function(c){return c.c===k});return{k:k,l:l,val:l.reduce(function(s,c){return s+c.v},0)}});
+ var go=[];sq(groups.map(function(g){return{g:g,val:g.val}}),0,0,W2,H,go);
+ go.forEach(function(r){var g=r.i.g,d=document.createElement("div");d.className="g";d.style.cssText="left:"+r.x+"px;top:"+r.y+"px;width:"+r.w+"px;height:"+r.h+"px";var lb=document.createElement("div");lb.className="gl";lb.textContent=g.k+" ›";d.appendChild(lb);el.appendChild(d);
+  var co=[];sq(g.l.slice().sort(function(a,b){return b.v-a.v}).map(function(c){return{c:c,val:c.v}}),0,16,r.w,r.h-16,co);
+  co.forEach(function(t){var c=t.i.c,v=mode==="d"?c.d:c.p,e=document.createElement("div");e.className="t";e.style.cssText="left:"+t.x+"px;top:"+t.y+"px;width:"+t.w+"px;height:"+t.h+"px;background:"+col(v)+(q&&c.n.toLowerCase().indexOf(q)<0?";opacity:.18":"");e.title=c.n+" "+fm(v,1);
+   var m=Math.min(t.w,t.h);var dk=Math.abs(v)>60;e.style.color=dk?"#fff":"#12261a";
+   if(m>34){var s=Math.max(18,Math.min(54,m*.34));e.innerHTML=(m>52?'<i style="width:'+s+'px;height:'+s+'px;font-size:'+s*.4+'px;margin-bottom:5px">'+c.n[0]+'</i>':"")+'<b style="font-size:'+Math.max(10,Math.min(20,m*.16))+'px">'+c.n+'</b>'+(m>44?'<s>'+fm(v,v>999||v<-999?0:1)+'</s>':"")}
+   d.appendChild(e)})})}
+Object.keys(CATS).forEach(function(k){var o=document.createElement("option");o.value=k;o.textContent=k;$("#fc").appendChild(o)});
+["#fq","#fc","#fm"].forEach(function(s){$(s).oninput=draw});addEventListener("resize",draw);
+$("#lg").innerHTML=[-250,-150,-50,0,50,150,250].map(function(p){return'<i style="background:'+col(p)+'"></i>'}).join("");
+baskets();draw();
+</script>
+
+</html>
